@@ -10,9 +10,10 @@
 
 import display
 import neopixel
-from math import pi, sin, sqrt
+from math import ceil, pi, sin, sqrt
 from time import sleep
 from .mhz19 import MHZ19
+import utime
 
 
 # Activate LEDs to also switch on 5V power supply to the MH-Z19.
@@ -55,17 +56,24 @@ def draw_history_graph_plot(rect, history):
         display.drawLine(x0, y0, x1, y1, 0x000000)
 
 
-def draw_history_graph(rect, history):
+def draw_history_graph(rect, history, x_axis_labels):
     x, y, w, h = rect
 
-    txt_h = display.getTextHeight('-')
+    txt_h = display.getTextHeight('-') + 2
     x_label_h = txt_h
 
     sample_min, sample_max = min(history), max(history)
     display.drawText(x, y, '%dppm' % sample_min, 0x000000)
-    display.drawText(x, y-txt_h+h-2 - x_label_h, '%dppm' % sample_max, 0x000000)
+    display.drawText(x, y-txt_h+h - x_label_h, '%dppm' % sample_max, 0x000000)
     draw_dashed_line(x, y, x+w-1, y, 0x000000)
     draw_dashed_line(x, y+h-1 - x_label_h, x+w-1, y+h-1 - x_label_h, 0x000000)
+
+    for sample_offset, label in x_axis_labels.items():
+        lx = x + w - sample_offset
+        if lx > display.size()[0]:
+            continue
+        draw_dashed_line(lx, y, lx, y+h-1 - x_label_h, 0x000000)
+        display.drawText(lx, y+h-txt_h, label)
 
     draw_history_graph_plot((x, y, w, h - x_label_h), history)
 
@@ -80,16 +88,33 @@ def draw_co2_label(rect, co2):
                      co2_label, 0x000000, 'permanentmarker22')
 
 
-def draw_ui(co2_history):
+def draw_ui(co2_now, co2_history, timestamps):
     w, h = display.size()
     display.drawFill(0xffffff)  # Clear
-    draw_co2_label((0, 0, w, h//4), co2_history[-1])
-    draw_history_graph((0, h//4, w, h//4*3), co2_history)
+    draw_co2_label((0, 0, w, h//4), co2_now)
+    draw_history_graph((0, h//4, w, h//4*3), co2_history, timestamps)
     display.flush()
 
 
+def history_timestamps(rate, max_sample_index):
+    (_, _, _, now_h, now_m, now_s, _, _) = utime.localtime()
+    now_s += now_m * 60
+
+    offset = int(now_s / rate)
+    labels = {}
+    for i in range(ceil(max_sample_index / (1800/rate))):
+        labels[offset + int(3600/rate) * i - int(1800/rate)] = '%d:30' % (now_h - i)
+        labels[offset + int(3600/rate) * i] = '%d:00' % (now_h - i)
+    return labels
+
+
+history_rate = 30
+
 mhz19 = None
 co2_history = []
+co2_history_add_counter = 0
+co2_history_max_len = display.size()[0]
+
 while True:
     if mhz19 is None:
         mhz19 = MHZ19(rx_pin=17, tx_pin=16)
@@ -102,9 +127,11 @@ while True:
         continue
 
     print('co2: %d' % co2)
-    co2_history.append(co2)
-    if len(co2_history) > display.size()[0]:
-        _ = co2_history.pop(0)
+    if co2_history_add_counter == 0:
+        co2_history.append(co2)
+        if len(co2_history) > co2_history_max_len:
+            _ = co2_history.pop(0)
+    co2_history_add_counter = (co2_history_add_counter+1) % history_rate
 
-    draw_ui(co2_history)
+    draw_ui(co2, co2_history, history_timestamps(history_rate, co2_history_max_len))
     sleep(1)
