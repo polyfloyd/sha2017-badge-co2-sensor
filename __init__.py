@@ -51,7 +51,7 @@ def draw_history_graph_plot(rect, history):
     sample_min, sample_max = min(history), max(history)
     sample_scale = 1.0 / max((sample_max-sample_min), 1)
     plot = [
-        (x+i + (w-len(history)), y + int((sample - sample_min) * sample_scale * h))
+        (x+i + (w-len(history)), y + int(h - (sample - sample_min) * sample_scale * h - 1))
         # history[-1] is the most recent sample.
         for i, sample in enumerate(history[max(-w, -len(history)):-1])
     ]
@@ -67,8 +67,8 @@ def draw_history_graph(rect, history, x_axis_labels):
     x_label_h = txt_h
 
     sample_min, sample_max = min(history), max(history)
-    display.drawText(x, y, '%dppm' % sample_min, 0x000000)
-    display.drawText(x, y-txt_h+h - x_label_h, '%dppm' % sample_max, 0x000000)
+    display.drawText(x, y, '%dppm' % sample_max, 0x000000)
+    display.drawText(x, y-txt_h+h - x_label_h, '%dppm' % sample_min, 0x000000)
     draw_dashed_line(x, y, x+w-1, y, 0x000000)
     draw_dashed_line(x, y+h-1 - x_label_h, x+w-1, y+h-1 - x_label_h, 0x000000)
 
