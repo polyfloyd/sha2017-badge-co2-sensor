@@ -10,15 +10,22 @@
 
 import display
 import neopixel
+from machine import I2C, Pin
 from math import ceil, pi, sin, sqrt
 from time import sleep
-from .mhz19 import MHZ19
 import utime
+
+from .bme280_float import BME280
+from .mhz19 import MHZ19
 
 
 # Activate LEDs to also switch on 5V power supply to the MH-Z19.
 neopixel.enable()
 neopixel.send(bytes(4 * [0]))
+
+i2c = I2C(sda=Pin(26), scl=Pin(27))
+bme280 = BME280(i2c=i2c)
+
 
 def clear_rect(rect):
     x, y, w, h = rect
@@ -93,27 +100,42 @@ def draw_co2_label(rect, co2):
                      co2_label, 0x000000, 'permanentmarker22')
 
 
+def draw_climate_labels(rect, temperature, pressure, humidity):
+    x, y, w, h = rect
+    clear_rect(rect)
+
+    label = '{:.2f}C  {:.2f}%'.format(temperature, humidity)
+    label_w = display.getTextWidth(label)
+    label_h = display.getTextHeight(label)
+    display.drawText(x + w//2 - label_w//2, y + h//2 - label_h//2, label, 0x000000)
+
+
 class UI:
     def __init__(self):
-        self.co2_now = None
+        self.co2 = None
         self.co2_history_hash = None
         self.timestamps = None
+        self.climate = None
         display.drawFill(0xffffff)  # Clear
 
-    def draw(self, co2_now, co2_history, timestamps):
+    def draw(self, co2, co2_history, timestamps, climate):
         w, h = display.size()
         co2_history_hash = hash(tuple(co2_history))
-        if co2_now != self.co2_now:
-            draw_co2_label((0, 0, w, h//4), co2_now)
+        if co2 != self.co2:
+            draw_co2_label((0, 0, int(w*(2/5)), h//4), co2)
+        if climate != self.climate:
+            temperature, pressure, humidity = climate
+            draw_climate_labels((int(w*(3/5)), 0, int(w*(2/5)), h//4), temperature, pressure, humidity)
         if co2_history_hash != self.co2_history_hash or self.timestamps != self.timestamps:
             draw_history_graph((0, h//4, w, h//4*3), co2_history, timestamps)
-        if co2_now != self.co2_now or co2_history_hash != self.co2_history_hash or self.timestamps != self.timestamps:
+        if co2 != self.co2 or co2_history_hash != self.co2_history_hash or self.timestamps != self.timestamps:
             display.flush()
 
         # Cache rendered values so we can prevent repainting parts of the screen.
-        self.co2_now = co2_now
+        self.co2 = co2
         self.co2_history_hash = hash(tuple(co2_history))
         self.timestamps = timestamps
+        self.climate = climate
 
 
 def history_timestamps(rate, max_sample_index):
@@ -138,6 +160,7 @@ co2 = None
 co2_show = None
 co2_show_accum = []
 co2_show_accum_max_len = 4
+climate = (0, 0, 0)
 ui = UI()
 
 while True:
@@ -145,13 +168,20 @@ while True:
         mhz19 = MHZ19(rx_pin=17, tx_pin=16)
     try:
         co2 = mhz19.gas_concentration()
+        print('co2: %d' % co2)
     except Exception as err:
         print(err)
         mhz19.close()
         mhz19 = None
         continue
+    try:
+        climate = bme280.read_compensated_data()
+        temperature, pressure, humidity = climate
+        print('temperature: {:.2f}C, pressure: {:.2f}hPa, humidity: {:.2f}%'.format(temperature, pressure/100, humidity))
+    except Exception as err:
+        print(err)
+        # Keep going
 
-    print('co2: %d' % co2)
     if co2_history_add_counter == 0:
         co2_history.append(co2)
         if len(co2_history) > co2_history_max_len:
@@ -164,8 +194,9 @@ while True:
         co2_show_accum = []
 
     ui.draw(
-        co2_now=co2_show,
+        co2=co2_show,
         co2_history=co2_history,
         timestamps=history_timestamps(history_rate, co2_history_max_len),
+        climate=climate,
     )
     sleep(1)
