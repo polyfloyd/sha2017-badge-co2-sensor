@@ -20,6 +20,9 @@ import utime
 neopixel.enable()
 neopixel.send(bytes(4 * [0]))
 
+def clear_rect(rect):
+    x, y, w, h = rect
+    display.drawRect(x, y, w, h, True, 0xffffff)
 
 def draw_dashed_line(x0, y0, x1, y1, color=0x000000, space=12):
     vx, vy = x1-x0, y1-y0
@@ -58,6 +61,7 @@ def draw_history_graph_plot(rect, history):
 
 def draw_history_graph(rect, history, x_axis_labels):
     x, y, w, h = rect
+    clear_rect(rect)
 
     txt_h = display.getTextHeight('-') + 2
     x_label_h = txt_h
@@ -80,6 +84,7 @@ def draw_history_graph(rect, history, x_axis_labels):
 
 def draw_co2_label(rect, co2):
     x, y, w, h = rect
+    clear_rect(rect)
 
     co2_label = 'CO2: %d' % co2
     co2_label_w = display.getTextWidth(co2_label, 'permanentmarker22')
@@ -88,12 +93,27 @@ def draw_co2_label(rect, co2):
                      co2_label, 0x000000, 'permanentmarker22')
 
 
-def draw_ui(co2_now, co2_history, timestamps):
-    w, h = display.size()
-    display.drawFill(0xffffff)  # Clear
-    draw_co2_label((0, 0, w, h//4), co2_now)
-    draw_history_graph((0, h//4, w, h//4*3), co2_history, timestamps)
-    display.flush()
+class UI:
+    def __init__(self):
+        self.co2_now = None
+        self.co2_history_hash = None
+        self.timestamps = None
+        display.drawFill(0xffffff)  # Clear
+
+    def draw(self, co2_now, co2_history, timestamps):
+        w, h = display.size()
+        co2_history_hash = hash(tuple(co2_history))
+        if co2_now != self.co2_now:
+            draw_co2_label((0, 0, w, h//4), co2_now)
+        if co2_history_hash != self.co2_history_hash or self.timestamps != self.timestamps:
+            draw_history_graph((0, h//4, w, h//4*3), co2_history, timestamps)
+        if co2_now != self.co2_now or co2_history_hash != self.co2_history_hash or self.timestamps != self.timestamps:
+            display.flush()
+
+        # Cache rendered values so we can prevent repainting parts of the screen.
+        self.co2_now = co2_now
+        self.co2_history_hash = hash(tuple(co2_history))
+        self.timestamps = timestamps
 
 
 def history_timestamps(rate, max_sample_index):
@@ -114,6 +134,11 @@ mhz19 = None
 co2_history = []
 co2_history_add_counter = 0
 co2_history_max_len = display.size()[0]
+co2 = None
+co2_show = None
+co2_show_accum = []
+co2_show_accum_max_len = 4
+ui = UI()
 
 while True:
     if mhz19 is None:
@@ -133,5 +158,14 @@ while True:
             _ = co2_history.pop(0)
     co2_history_add_counter = (co2_history_add_counter+1) % history_rate
 
-    draw_ui(co2, co2_history, history_timestamps(history_rate, co2_history_max_len))
+    co2_show_accum.append(co2)
+    if len(co2_show_accum) >= co2_show_accum_max_len or co2_show is None:
+        co2_show = sum(co2_show_accum) / len(co2_show_accum)
+        co2_show_accum = []
+
+    ui.draw(
+        co2_now=co2_show,
+        co2_history=co2_history,
+        timestamps=history_timestamps(history_rate, co2_history_max_len),
+    )
     sleep(1)
