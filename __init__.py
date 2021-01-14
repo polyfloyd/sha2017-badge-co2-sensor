@@ -1,12 +1,12 @@
 # Header connections:
 #
-#   ^ this side is facing the SD card reader
-#   o o GND
-#   o o 5V
-#   o o
-#   o o IO16/27 TX -> MH-Z19 RX
-#   o o IO17/28 RX -> MH-Z19 TX
-#   o o
+#       ^ this side is facing the SD card reader
+#  3.3v o o GND
+#   GND o o 5V
+#       o o
+#       o o IO16/27 TX -> MH-Z19 RX
+#       o o IO17/28 RX -> MH-Z19 TX
+#   SDA o o SCL
 
 import display
 import neopixel
