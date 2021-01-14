@@ -1,0 +1,215 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L power:GND #PWR0101
+U 1 1 5FE6721B
+P 3800 2850
+F 0 "#PWR0101" H 3800 2600 50  0001 C CNN
+F 1 "GND" H 3805 2677 50  0000 C CNN
+F 2 "" H 3800 2850 50  0001 C CNN
+F 3 "" H 3800 2850 50  0001 C CNN
+	1    3800 2850
+	-1   0    0    1   
+$EndComp
+$Comp
+L MH-Z19:MHZ19 J2
+U 1 1 5FE602C1
+P 5750 3000
+F 0 "J2" H 5725 3075 50  0000 C CNN
+F 1 "MH-Z19" H 5725 2984 50  0000 C CNN
+F 2 "MH-Z19:Sensor_MH-Z19" H 5750 3000 50  0001 C CNN
+F 3 "" H 5750 3000 50  0001 C CNN
+	1    5750 3000
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0102
+U 1 1 5FE69E17
+P 6150 3350
+F 0 "#PWR0102" H 6150 3100 50  0001 C CNN
+F 1 "GND" H 6155 3177 50  0000 C CNN
+F 2 "" H 6150 3350 50  0001 C CNN
+F 3 "" H 6150 3350 50  0001 C CNN
+	1    6150 3350
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6150 3350 6050 3350
+$Comp
+L power:+5V #PWR0103
+U 1 1 5FE6A7E3
+P 6050 3500
+F 0 "#PWR0103" H 6050 3350 50  0001 C CNN
+F 1 "+5V" H 6065 3673 50  0000 C CNN
+F 2 "" H 6050 3500 50  0001 C CNN
+F 3 "" H 6050 3500 50  0001 C CNN
+	1    6050 3500
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	6050 3450 6050 3500
+$Comp
+L power:+5V #PWR0104
+U 1 1 5FE6BCB8
+P 3950 2850
+F 0 "#PWR0104" H 3950 2700 50  0001 C CNN
+F 1 "+5V" H 3965 3023 50  0000 C CNN
+F 2 "" H 3950 2850 50  0001 C CNN
+F 3 "" H 3950 2850 50  0001 C CNN
+	1    3950 2850
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x04 J3
+U 1 1 5FE7AE07
+P 1250 3350
+F 0 "J3" H 1168 2925 50  0000 C CNN
+F 1 "BME280_I2C" H 1168 3016 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical" H 1250 3350 50  0001 C CNN
+F 3 "~" H 1250 3350 50  0001 C CNN
+	1    1250 3350
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	1450 3450 1500 3450
+$Comp
+L power:GND #PWR0106
+U 1 1 5FE7E4AA
+P 1600 3350
+F 0 "#PWR0106" H 1600 3100 50  0001 C CNN
+F 1 "GND" H 1605 3177 50  0000 C CNN
+F 2 "" H 1600 3350 50  0001 C CNN
+F 3 "" H 1600 3350 50  0001 C CNN
+	1    1600 3350
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1600 3350 1450 3350
+Text GLabel 1500 3250 2    50   Input ~ 0
+I2C_SCL
+Text GLabel 1500 3150 2    50   Input ~ 0
+I2C_SDA
+Wire Wire Line
+	1450 3150 1500 3150
+Wire Wire Line
+	1450 3250 1500 3250
+Text GLabel 2600 3550 0    50   Output ~ 0
+I2C_SDA
+Text GLabel 2600 3650 0    50   Output ~ 0
+I2C_SCL
+$Comp
+L power:+3.3V #PWR03
+U 1 1 5FEE1284
+P 3250 2850
+F 0 "#PWR03" H 3250 2700 50  0001 C CNN
+F 1 "+3.3V" V 3265 2978 50  0000 L CNN
+F 2 "" H 3250 2850 50  0001 C CNN
+F 3 "" H 3250 2850 50  0001 C CNN
+	1    3250 2850
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR02
+U 1 1 5FEE1C83
+P 3100 2850
+F 0 "#PWR02" H 3100 2600 50  0001 C CNN
+F 1 "GND" H 3105 2677 50  0000 C CNN
+F 2 "" H 3100 2850 50  0001 C CNN
+F 3 "" H 3100 2850 50  0001 C CNN
+	1    3100 2850
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:+3.3V #PWR01
+U 1 1 5FEE405B
+P 1500 3450
+F 0 "#PWR01" H 1500 3300 50  0001 C CNN
+F 1 "+3.3V" H 1515 3623 50  0000 C CNN
+F 2 "" H 1500 3450 50  0001 C CNN
+F 3 "" H 1500 3450 50  0001 C CNN
+	1    1500 3450
+	-1   0    0    1   
+$EndComp
+$Comp
+L SHA2017:SHA2017_Badge_Breakout J1
+U 1 1 5FEE2A0D
+P 3550 2950
+F 0 "J1" H 3550 3075 50  0000 C CNN
+F 1 "SHA2017_Badge_Breakout" H 3550 2984 50  0000 C CNN
+F 2 "SHA2017:SHA2017_Badge_Breakout" H 3550 2950 50  0001 C CNN
+F 3 "" H 3550 2950 50  0001 C CNN
+	1    3550 2950
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2600 3650 3700 3650
+Wire Wire Line
+	3700 3550 3700 3650
+Wire Wire Line
+	3800 3050 3800 2850
+Wire Wire Line
+	3950 3150 3950 2850
+Wire Wire Line
+	3250 3050 3250 2850
+Wire Wire Line
+	3100 3150 3100 2850
+Wire Wire Line
+	3250 3050 3500 3050
+Wire Wire Line
+	3100 3150 3500 3150
+Wire Wire Line
+	3600 3050 3800 3050
+Wire Wire Line
+	3600 3150 3950 3150
+Wire Wire Line
+	3700 3550 3600 3550
+Text GLabel 5400 3250 0    50   BiDi ~ 0
+MHZ19_TX
+Text GLabel 5400 3350 0    50   BiDi ~ 0
+MHZ19_RX
+Text GLabel 4300 3450 2    50   BiDi ~ 0
+MHZ19_TX
+Text GLabel 4300 3350 2    50   BiDi ~ 0
+MHZ19_RX
+Wire Wire Line
+	2600 3550 3500 3550
+Wire Wire Line
+	4300 3350 3600 3350
+Wire Wire Line
+	3600 3450 4300 3450
+$Comp
+L Mechanical:MountingHole H2
+U 1 1 5FEE47D5
+P 1650 4200
+F 0 "H2" H 1750 4246 50  0000 L CNN
+F 1 "MountingHole" H 1750 4155 50  0000 L CNN
+F 2 "MountingHole:MountingHole_4mm" H 1650 4200 50  0001 C CNN
+F 3 "~" H 1650 4200 50  0001 C CNN
+	1    1650 4200
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H1
+U 1 1 5FEE505B
+P 1250 4200
+F 0 "H1" H 1350 4246 50  0000 L CNN
+F 1 "MountingHole" H 1350 4155 50  0000 L CNN
+F 2 "MountingHole:MountingHole_4mm" H 1250 4200 50  0001 C CNN
+F 3 "~" H 1250 4200 50  0001 C CNN
+	1    1250 4200
+	1    0    0    -1  
+$EndComp
+$EndSCHEMATC

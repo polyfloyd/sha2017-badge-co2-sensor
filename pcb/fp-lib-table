@@ -1,0 +1,5 @@
+(fp_lib_table
+  (lib (name MH-Z19)(type KiCad)(uri ${KIPRJMOD}/modules/Sensor_MH-Z19.pretty)(options "")(descr ""))
+  (lib (name Keyhole)(type KiCad)(uri ${KIPRJMOD}/modules/Keyhole.pretty)(options "")(descr ""))
+  (lib (name SHA2017)(type KiCad)(uri ${KIPRJMOD}/modules/SHA2017.pretty)(options "")(descr ""))
+)
