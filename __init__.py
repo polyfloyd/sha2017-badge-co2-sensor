@@ -27,7 +27,7 @@ CO2_THRESHOLD_CRITICAL = 1600
 
 # Activate LEDs to also switch on 5V power supply to the MH-Z19.
 neopixel.enable()
-neopixel.send(bytes(4 * [0]))
+neopixel.send(bytes(4*6 * [0]))
 
 i2c = I2C(sda=Pin(26), scl=Pin(27))
 bme280 = BME280(i2c=i2c)
@@ -230,13 +230,19 @@ while True:
         co2_show = sum(co2_show_accum) / len(co2_show_accum)
         co2_show_accum = []
 
+    brightness = 0x10  # Oof owie my eyes
+    grbw = 6*4 * [0]
     message = ''
     if co2_show > CO2_THRESHOLD_CRITICAL:
+        grbw = 6 * [0, (int(utime.time())&1) * brightness, 0, 0]
         message = 'CO2 KRITIEK: NU RAMEN OPENEN'
     elif co2_show > CO2_THRESHOLD_WARNING:
+        grbw = 6 * [0, brightness, 0, 0]
         message = 'CO2 hoog, open een raam!'
     elif co2_show > CO2_THRESHOLD_NOTICE:
         message = 'Ventileren raadzaam'
+
+    _ = neopixel.send(bytes(grbw))
 
     ui.draw(
         co2=co2_show,
