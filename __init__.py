@@ -139,14 +139,20 @@ class UI:
 
 
 def history_timestamps(rate, max_sample_index):
-    (_, _, _, now_h, now_m, now_s, _, _) = utime.localtime()
+    (year, _, _, now_h, now_m, now_s, _, _) = utime.localtime()
     now_s += now_m * 60
 
-    offset = int(now_s / rate)
+    reltime = year < 2020  # If NTP is not synced, fall back to relative time offsets.
+    if reltime:
+        now_h, now_s = 0, 0
+
+    offset = now_s // rate
     labels = {}
-    for i in range(ceil(max_sample_index / (1800/rate))):
-        labels[offset + int(3600/rate) * i - int(1800/rate)] = '%d:30' % (now_h - i)
-        labels[offset + int(3600/rate) * i] = '%d:00' % (now_h - i)
+    for i in range(ceil(max_sample_index / (3600/rate))):
+        h = now_h-i if reltime else (now_h-i + 24) % 24
+        half_h = h+1 if reltime else h
+        labels[offset + 3600//rate * i - 1800//rate] = '%d:30' % half_h
+        labels[offset + 3600//rate * i] = '%d:00' % h
     return labels
 
 
