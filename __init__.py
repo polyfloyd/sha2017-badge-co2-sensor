@@ -20,6 +20,11 @@ from .bme280_float import BME280
 from .mhz19 import MHZ19
 
 
+CO2_THRESHOLD_NOTICE = 600
+CO2_THRESHOLD_WARNING = 800
+CO2_THRESHOLD_CRITICAL = 1600
+
+
 # Activate LEDs to also switch on 5V power supply to the MH-Z19.
 neopixel.enable()
 neopixel.send(bytes(4 * [0]))
@@ -111,25 +116,43 @@ def draw_climate_labels(rect, temperature, pressure, humidity):
     display.drawText(x + w//2 - label_w//2, y + h//2 - label_h//2, label, 0x000000)
 
 
+def draw_message_label(pos, label):
+    if not label:
+        return
+    center_x, center_y = pos
+    padding = 4
+    label_w, label_h = display.getTextWidth(label), display.getTextHeight(label)+4
+    area_x, area_y = center_x - label_w//2 - padding, center_y - label_h//2 - padding
+    display.drawRect(area_x, area_y, label_w+padding*2, label_h+padding*2, True, 0)
+    display.drawText(area_x+padding, area_y+padding, label, 0xffffff)
+
+
 class UI:
     def __init__(self):
         self.co2 = None
         self.co2_history_hash = None
         self.timestamps = None
         self.climate = None
+        self.message = ''
         display.drawFill(0xffffff)  # Clear
 
-    def draw(self, co2, co2_history, timestamps, climate):
+    def draw(self, co2, co2_history, timestamps, climate, message):
         w, h = display.size()
         co2_history_hash = hash(tuple(co2_history))
+        repaint = False
         if co2 != self.co2:
             draw_co2_label((0, 0, int(w*(2/5)), h//4), co2)
+            repaint = True
         if climate != self.climate:
             temperature, pressure, humidity = climate
             draw_climate_labels((int(w*(3/5)), 0, int(w*(2/5)), h//4), temperature, pressure, humidity)
-        if co2_history_hash != self.co2_history_hash or self.timestamps != self.timestamps:
-            draw_history_graph((0, h//4, w, h//4*3), co2_history, timestamps)
-        if co2 != self.co2 or co2_history_hash != self.co2_history_hash or self.timestamps != self.timestamps:
+            repaint = True
+        if co2_history_hash != self.co2_history_hash or self.timestamps != self.timestamps or self.message != message:
+            graph_rect = (0, h//4, w, h//4*3)
+            draw_history_graph(graph_rect, co2_history, timestamps)
+            draw_message_label((w//2, graph_rect[1] + graph_rect[3]//2), message)
+            repaint = True
+        if repaint:
             display.flush()
 
         # Cache rendered values so we can prevent repainting parts of the screen.
@@ -137,6 +160,7 @@ class UI:
         self.co2_history_hash = hash(tuple(co2_history))
         self.timestamps = timestamps
         self.climate = climate
+        self.message = message
 
 
 def history_timestamps(rate, max_sample_index):
@@ -206,10 +230,19 @@ while True:
         co2_show = sum(co2_show_accum) / len(co2_show_accum)
         co2_show_accum = []
 
+    message = ''
+    if co2_show > CO2_THRESHOLD_CRITICAL:
+        message = 'CO2 KRITIEK: NU RAMEN OPENEN'
+    elif co2_show > CO2_THRESHOLD_WARNING:
+        message = 'CO2 hoog, open een raam!'
+    elif co2_show > CO2_THRESHOLD_NOTICE:
+        message = 'Ventileren raadzaam'
+
     ui.draw(
         co2=co2_show,
         co2_history=co2_history,
         timestamps=history_timestamps(history_rate, co2_history_max_len),
         climate=climate,
+        message=message,
     )
     sleep(1)
