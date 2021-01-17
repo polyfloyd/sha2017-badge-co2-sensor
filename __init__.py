@@ -13,6 +13,8 @@ import neopixel
 from machine import I2C, Pin
 from math import ceil, pi, sin, sqrt
 from time import sleep
+from umqtt.simple import MQTTClient
+import urandom
 import utime
 import wifi
 
@@ -183,6 +185,11 @@ def history_timestamps(rate, max_sample_index):
 
 history_rate = 30
 
+mqtt_server = machine.nvs_getstr('sensors', 'mqtt.server') or 'test.mosquitto.org'
+mqtt_prefix = machine.nvs_getstr('sensors', 'mqtt.prefix') or 'space/climate'
+mqtt = MQTTClient('SHA2017Badge ' + str(urandom.getrandbits(30)), mqtt_server)
+nickname = machine.nvs_getstr('owner', 'name') or 'DEFAULT'
+
 mhz19 = None
 co2_history = []
 co2_history_add_counter = 0
@@ -196,10 +203,15 @@ ui = UI()
 
 while True:
     time_synced = utime.localtime()[0] >= 2020
-    if not time_synced and not wifi.status():
+    if not wifi.status():
         _ = wifi.connect()
     if not time_synced and wifi.status():
         _ = wifi.ntp()
+    if wifi.status():
+        try:
+            mqtt.ping()
+        except:
+            mqtt.connect()
 
     if mhz19 is None:
         mhz19 = MHZ19(rx_pin=17, tx_pin=16)
@@ -212,9 +224,16 @@ while True:
         mhz19 = None
         continue
     try:
+        mqtt.publish('%s/%s/co2_ppm' % (mqtt_prefix, nickname), str(co2))
+    except Exception as err:
+        print(err)
+    try:
         climate = bme280.read_compensated_data()
         temperature, pressure, humidity = climate
         print('temperature: {:.2f}C, pressure: {:.2f}hPa, humidity: {:.2f}%'.format(temperature, pressure/100, humidity))
+        mqtt.publish('%s/%s/temperature_c' % (mqtt_prefix, nickname), '{:.2f}'.format(temperature))
+        mqtt.publish('%s/%s/pressure_hpa' % (mqtt_prefix, nickname), '{:.2f}'.format(pressure/100))
+        mqtt.publish('%s/%s/humidity_pct' % (mqtt_prefix, nickname), '{:.2f}'.format(humidity))
     except Exception as err:
         print(err)
         # Keep going
