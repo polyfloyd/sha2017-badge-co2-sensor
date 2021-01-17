@@ -14,6 +14,7 @@ from machine import I2C, Pin
 from math import ceil, pi, sin, sqrt
 from time import sleep
 import utime
+import wifi
 
 from .bme280_float import BME280
 from .mhz19 import MHZ19
@@ -170,6 +171,12 @@ climate = (0, 0, 0)
 ui = UI()
 
 while True:
+    time_synced = utime.localtime()[0] >= 2020
+    if not time_synced and not wifi.status():
+        _ = wifi.connect()
+    if not time_synced and wifi.status():
+        _ = wifi.ntp()
+
     if mhz19 is None:
         mhz19 = MHZ19(rx_pin=17, tx_pin=16)
     try:
