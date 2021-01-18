@@ -10,7 +10,7 @@
 
 import display
 import neopixel
-from machine import I2C, Pin
+from machine import I2C, Pin, nvs_getstr
 from math import ceil, pi, sin, sqrt
 from time import sleep
 from umqtt.simple import MQTTClient
@@ -185,10 +185,10 @@ def history_timestamps(rate, max_sample_index):
 
 history_rate = 30
 
-mqtt_server = machine.nvs_getstr('sensors', 'mqtt.server') or 'test.mosquitto.org'
-mqtt_prefix = machine.nvs_getstr('sensors', 'mqtt.prefix') or 'space/climate'
+mqtt_server = nvs_getstr('sensors', 'mqtt.server') or 'test.mosquitto.org'
+mqtt_prefix = nvs_getstr('sensors', 'mqtt.prefix') or 'space/climate'
 mqtt = MQTTClient('SHA2017Badge ' + str(urandom.getrandbits(30)), mqtt_server)
-nickname = machine.nvs_getstr('owner', 'name') or 'DEFAULT'
+nickname = nvs_getstr('owner', 'name') or 'DEFAULT'
 
 mhz19 = None
 co2_history = []
