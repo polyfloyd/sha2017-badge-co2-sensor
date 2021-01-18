@@ -27,3 +27,6 @@ NVS settings:
 | `sensors` | `mqtt.server` | `test.mosquitto.org`      |
 | `sensors` | `mqtt.prefix` | `space/climate`           |
 
+This app is published on the SHA Badge repository, install
+`sha2017_badge_co2_sensor` to get it. You may also want to set the NVS setting
+`system`/`default_app` to launch it on powerup.
