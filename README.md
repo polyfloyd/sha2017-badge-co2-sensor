@@ -7,6 +7,8 @@ used as a trigger for alerts.
 
 Also reads a BME280 climate sensor as a bonus.
 
+![Assembled SHA Badge CO2 addon](photo.jpg)
+
 The CO2 warning thresholds are set to levels suitable to reduce the risk of
 Coronavirus infections.
 
