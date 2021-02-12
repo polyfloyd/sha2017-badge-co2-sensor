@@ -18,13 +18,29 @@ import urandom
 import utime
 import wifi
 
-from .bme280_float import BME280
-from .mhz19 import MHZ19
+#from .bme280_float import BME280
+#from .mhz19 import MHZ19
 
 
 CO2_THRESHOLD_NOTICE = 600
 CO2_THRESHOLD_WARNING = 800
 CO2_THRESHOLD_CRITICAL = 1600
+
+
+#class MHZ19:
+#    def __init__(self, **kwargs):
+#        self.i = 0
+#    def gas_concentration(self):
+#        self.i += 1
+#        return 1000 + sin(self.i/30.0*pi)*800
+#    def close(self):
+#        pass
+#
+#class BME280:
+#    def __init__(*args, **kwargs):
+#        pass
+#    def read_compensated_data(self):
+#        return (20,1000,45)
 
 
 # Activate LEDs to also switch on 5V power supply to the MH-Z19.
