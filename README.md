@@ -1,6 +1,8 @@
 SHA2017 Badge CO2 Sensor
 ========================
 
+**NOTE: This app has been replaced by esphome and is thus unmaintained**
+
 MicroPython program for reading an MH-Z19 carbon dioxide sensor. The values are
 displayed on the badge's display as a single stat and graph, pushed to MQTT and
 used as a trigger for alerts.
